@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; object-src 'none';" />
+<title>Skynet</title>
+<link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <!-- ============ CUSTOM TITLEBAR (frameless window) ============ -->
+  <header class="titlebar" id="titlebar">
+    <div class="tb-left">
+      <button class="nav-toggle" id="navToggle" type="button" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <span class="nav-toggle-glyph" aria-hidden="true"></span>
+      </button>
+      <span class="tb-mark" aria-hidden="true"></span>
+      <span class="tb-wordmark">SKYNET</span>
+      <!-- WHICH bytes are running. Two payloads once shipped as "0.1.1", so the version
+           string alone could not triage a crash report; this shows the content-derived
+           build id and carries the full identity in its tooltip. -->
+      <span class="tb-appbuild" id="tbAppBuild" hidden></span>
+      <span class="tb-divider" aria-hidden="true"></span>
+      <span class="tb-sub" id="tbBuild">desktop</span>
+    </div>
+
+    <div class="tb-drag-fill"></div>
+
+    <div class="win-controls">
+      <button class="win-btn win-min" id="winMin" type="button" title="Minimize" aria-label="Minimize"></button>
+      <button class="win-btn win-max" id="winMax" type="button" title="Maximize" aria-label="Maximize"></button>
+      <button class="win-btn win-close" id="winClose" type="button" title="Close" aria-label="Close"></button>
+    </div>
+  </header>
+
+  <!-- ============ APP BODY ============ -->
+  <div class="app" id="app">
+
+    <div class="scrim" id="scrim" hidden></div>
+
+    <!-- ---------- SIDEBAR ---------- -->
+    <aside class="sidebar" id="sidebar" aria-label="Sessions">
+      <div class="side-head">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-text">SKYNET</span>
+        </div>
+        <button class="new-chat" id="newChat" type="button">
+          <span class="new-chat-plus" aria-hidden="true">+</span>
+          <span>New chat</span>
+        </button>
+      </div>
+
+      <div class="side-scroll" id="sideScroll">
+        <div class="side-label">Sessions</div>
+        <div class="session-list" id="sessionList">
+          <div class="side-note" id="sessionsNote">Loading&#8230;</div>
+        </div>
+      </div>
+
+      <button class="side-settings" id="settingsBtn" type="button">
+        <span class="side-settings-glyph" aria-hidden="true"></span>
+        <span>Models &amp; fleet</span>
+      </button>
+
+      <button class="side-foot" id="laneFoot" type="button" title="Route diagnostics">
+        <span class="dot" id="laneDot" data-status="unknown" aria-hidden="true"></span>
+        <span class="lane-foot-text">
+          <span class="lane-name" id="laneName">route unknown</span>
+          <span class="lane-model" id="laneModel">&#8212;</span>
+        </span>
+        <span class="lane-foot-caret" aria-hidden="true"></span>
+      </button>
+    </aside>
+
+    <!-- ---------- MAIN ---------- -->
+    <main class="main is-empty" id="main">
+
+      <div class="banner" id="banner" hidden>
+        <span class="banner-tag" id="bannerTag">OFFLINE</span>
+        <span class="banner-text" id="bannerText"></span>
+        <button class="banner-retry" id="bannerRetry" type="button">Retry</button>
+      </div>
+
+      <div class="transcript" id="transcript" tabindex="-1">
+        <div class="transcript-inner">
+
+          <!-- Design review, round 1: the centre mark and the three suggestion cards were
+               cut. They pushed the composer down into a footer afterthought and made the
+               empty state read as a demo. The action is the subject now. -->
+          <section class="empty" id="empty">
+            <h1 class="empty-title">What should Skynet work on?</h1>
+            <p class="empty-sub">Ask anything. Skynet picks the models and shows its work.</p>
+          </section>
+
+          <div class="turns" id="turns"></div>
+
+        </div>
+      </div>
+
+      <!-- ---------- COMPOSER ---------- -->
+      <div class="composer-wrap">
+        <div class="composer" id="composer">
+          <textarea id="input" class="input" rows="1" spellcheck="true"
+                    placeholder="Message Skynet&#8230;" aria-label="Message Skynet"></textarea>
+
+          <div class="composer-bar">
+            <button class="lane-chip" id="laneChip" type="button" aria-haspopup="true" aria-expanded="false">
+              <span class="chip-glyph" id="chipGlyph" aria-hidden="true">&#9675;</span>
+              <span class="chip-label" id="chipLabel">Mode: Best</span>
+              <span class="chip-caret" aria-hidden="true"></span>
+            </button>
+
+            <span class="composer-spacer"></span>
+
+            <span class="composer-hint" id="composerHint">Enter to send &#183; Shift+Enter for newline</span>
+
+            <button class="send-btn" id="sendBtn" type="button" disabled aria-label="Send message">
+              <span class="send-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ---------- SETTINGS DRAWER ---------- -->
+      <div class="settings-scrim" id="settingsScrim" hidden></div>
+      <aside class="settings" id="settings" hidden aria-label="Models and fleet settings">
+        <header class="settings-head">
+          <h2 class="settings-title">Models &amp; fleet</h2>
+          <button class="settings-close" id="settingsClose" type="button" aria-label="Close settings"></button>
+        </header>
+
+        <div class="settings-body">
+
+          <!-- ---------- WORKSPACE ----------
+               Owner question during review: "what folder is it going to use?" It used to
+               be the repo root, hardcoded, and nothing on screen said so. -->
+          <section class="settings-block">
+            <div class="settings-block-head">
+              <h3 class="settings-h3">Working folder</h3>
+              <span class="settings-sub" id="workspaceState"></span>
+            </div>
+            <p class="settings-note">Agents read and write here. Everything outside this folder is out of reach.</p>
+            <div class="workspace-row">
+              <span class="workspace-glyph" aria-hidden="true"></span>
+              <span class="workspace-path" id="workspacePath" title="">detecting&#8230;</span>
+              <button class="ghost-btn" id="workspacePick" type="button">Change&#8230;</button>
+              <button class="ghost-btn" id="workspaceReset" type="button" title="Back to the default folder">Reset</button>
+            </div>
+            <div class="workspace-facts" id="workspaceFacts"></div>
+            <div class="workspace-warn" id="workspaceWarn" hidden></div>
+          </section>
+
+          <!-- ---------- MODELS ---------- -->
+          <section class="settings-block">
+            <div class="settings-block-head">
+              <h3 class="settings-h3">Models</h3>
+              <span class="settings-sub" id="subsSummary">detecting&#8230;</span>
+            </div>
+            <p class="settings-note">Detected from the accounts already signed in on this PC. Pick the model each lane should run; switch one off to keep it out of every mode and role.</p>
+            <div class="subs-list" id="subsList"></div>
+            <div class="local-servers" id="localServers" hidden></div>
+          </section>
+
+          <!-- ---------- BRING YOUR OWN API KEY ---------- -->
+          <section class="settings-block">
+            <div class="settings-block-head">
+              <h3 class="settings-h3">API keys</h3>
+              <span class="settings-sub" id="apiKeysState"></span>
+            </div>
+            <p class="settings-note">No subscription? Add a provider key and it becomes a lane like any other. Keys stay in the local backend and are never sent to this window. The line above says how they are protected on this PC.</p>
+            <div class="api-list" id="apiList"></div>
+            <button class="ghost-btn add-key" id="apiAdd" type="button">+ Add an API key</button>
+            <form class="api-form" id="apiForm" hidden>
+              <div class="api-grid">
+                <label class="api-field">
+                  <span>Provider</span>
+                  <select id="apiProvider"></select>
+                </label>
+                <label class="api-field">
+                  <span>Name <small>optional</small></span>
+                  <input id="apiLabel" type="text" autocomplete="off" spellcheck="false" placeholder="Work key" />
+                </label>
+              </div>
+              <label class="api-field api-field-wide" id="apiBaseWrap" hidden>
+                <span>Base URL</span>
+                <input id="apiBaseUrl" type="text" autocomplete="off" spellcheck="false" placeholder="https://&#8230;" />
+              </label>
+              <label class="api-field api-field-wide">
+                <span>API key</span>
+                <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="paste the key" />
+              </label>
+              <label class="api-check" id="apiLocalWrap" hidden>
+                <input id="apiAllowLocal" type="checkbox" />
+                <span>This is a local model server on this machine</span>
+              </label>
+              <div class="api-verdict" id="apiVerdict" hidden></div>
+              <label class="api-field api-field-wide" id="apiModelWrap" hidden>
+                <span>Model</span>
+                <select id="apiModel"></select>
+              </label>
+              <div class="api-actions">
+                <button class="ghost-btn" id="apiTest" type="button">Test key</button>
+                <button class="primary-btn" id="apiSave" type="button">Save</button>
+                <button class="ghost-btn" id="apiCancel" type="button">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <!-- ---------- FLEET ROLES ----------
+               Rows, not tokens. The owner's report on the old board: "cant use the same
+               model for one row" - assigning a model to one role removed it everywhere
+               else, so two workers on the same model was impossible. -->
+        <section class="settings-block orchestration" aria-labelledby="orchestrationTitle">
+          <div class="orchestration-head">
+            <span class="orchestration-title" id="orchestrationTitle">Fleet roles</span>
+            <label class="role-switch">
+              <input id="orchestrationToggle" type="checkbox" />
+              <span class="role-switch-track" aria-hidden="true"><span></span></span>
+              <span id="orchestrationState">Off</span>
+            </label>
+          </div>
+          <p class="orchestration-note" id="orchestrationNote">Every row is its own run, so the same model can fill as many rows as you want. Workers answer first; the orchestrator writes the final answer from their results.</p>
+          <div class="role-board" id="roleBoard" hidden>
+
+            <div class="role-section">
+              <div class="role-section-head">
+                <span class="role-section-title">Orchestrator</span>
+                <span class="role-section-sub">writes the final answer</span>
+              </div>
+              <div class="role-rows" id="orchestratorRows"></div>
+            </div>
+
+            <div class="role-section">
+              <div class="role-section-head">
+                <span class="role-section-title">Workers</span>
+                <span class="role-section-sub">run in order, results go to the orchestrator</span>
+              </div>
+              <div class="role-rows" id="workerRows"></div>
+              <button class="ghost-btn row-add" id="workerAdd" type="button">+ Add worker</button>
+              <div class="role-contention" id="workerContention" hidden></div>
+            </div>
+
+            <div class="role-section">
+              <div class="role-section-head">
+                <span class="role-section-title">Validators</span>
+                <span class="role-section-sub">optional &#183; review only</span>
+              </div>
+              <div class="role-rows" id="advisorRows"></div>
+              <button class="ghost-btn row-add" id="advisorAdd" type="button">+ Add validator</button>
+            </div>
+
+          </div>
+        </section>
+
+        </div>
+      </aside>
+
+      <!-- ---------- OUTCOME MODE PICKER ---------- -->
+      <div class="lane-pop" id="lanePop" hidden role="dialog" aria-label="Choose response mode">
+        <div class="lane-pop-head">
+          <span>Response mode</span>
+          <span class="lane-pop-sub" id="lanePopSub"></span>
+        </div>
+        <div class="lane-pop-list" id="lanePopList"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

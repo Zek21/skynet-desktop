@@ -1,0 +1,21 @@
+# Build output
+desktop/dist/
+desktop/node_modules/
+
+# Generated per build -- the attestation describes ONE local build, so committing it would
+# publish a claim about bytes nobody else has. Release attestations are attached to the
+# GitHub release instead.
+desktop/release-build-attestation.json
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

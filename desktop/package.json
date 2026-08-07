@@ -1,0 +1,70 @@
+{
+  "name": "skynet-desktop",
+  "productName": "Skynet Desktop",
+  "version": "0.1.1",
+  "description": "Skynet desktop app — the fleet cockpit as a native window, not a terminal and not a browser tab.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --dir",
+    "build:installer": "python ../tools/skynet_desktop_build.py",
+    "build:installer:unstamped": "electron-builder --win",
+    "pack": "npm run build:installer && npm run verify:release",
+    "stamp": "python ../tools/skynet_desktop_build_stamp.py --json",
+    "verify:release": "python ../tools/skynet_desktop_release_gate.py"
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "skynetRelease": {
+    "distributionMode": "unsigned",
+    "sevenZipSha256": "223b873c50380fe9a39f1a22b6abf8d46db506e1c08d08312902f6f3cd1f7ac3",
+    "electronVersion": "43.2.0",
+    "electronBuilderVersion": "26.15.3",
+    "electronReferenceExeSha256": "8593db40c0c6e5e3c4b6b0a225b1dc9a549ecdf10f6cf2010cf5b6ce869ce07f",
+    "electronReferenceTreeSha256": "9bd20da8b09482a8dbdef46d83ff3d3e480421b8dc1f9c5bd996b08878e41cf5",
+    "expectedWindowTitle": "Skynet",
+    "requiredUiUrlSuffix": "/renderer/index.html",
+    "shortcutName": "Skynet Desktop",
+    "appUserModelId": "ai.skynet.desktop"
+  },
+  "build": {
+    "appId": "ai.skynet.desktop",
+    "productName": "Skynet Desktop",
+    "forceCodeSigning": false,
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "lib/**/*",
+      "renderer/**/*",
+      "build/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "executableName": "Skynet Desktop",
+      "signExecutable": false
+    },
+    "nsis": {
+      "include": "nsis/installer.nsh",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Skynet Desktop",
+      "artifactName": "Skynet-Desktop-Setup-${version}-x64.${ext}",
+      "uninstallDisplayName": "Skynet Desktop ${version}",
+      "perMachine": false,
+      "runAfterFinish": true
+    }
+  }
+}
