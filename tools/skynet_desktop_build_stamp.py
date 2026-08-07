@@ -45,6 +45,7 @@ SOURCE_MEMBERS = (
     "renderer/index.html",
     "renderer/app.js",
     "renderer/app.css",
+    "renderer/support-qr.png",
     "build/icon.ico",
     "build/icon.png",
 )

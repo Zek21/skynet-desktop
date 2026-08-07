@@ -64,6 +64,9 @@ SOURCE_MEMBERS = (
     "renderer/index.html",
     "renderer/app.js",
     "renderer/app.css",
+    # The support QR is a REVIEWED payload member on purpose: it encodes a payment URL, so an
+    # unreviewed swap here would silently redirect sponsors. Its bytes are hash-pinned like code.
+    "renderer/support-qr.png",
     "build/icon.ico",
     "build/icon.png",
 )

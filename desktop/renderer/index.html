@@ -78,6 +78,26 @@
     <!-- ---------- MAIN ---------- -->
     <main class="main is-empty" id="main">
 
+      <!-- Support card. Shown at most ONCE PER CALENDAR DAY and always dismissible: a
+           sponsorship ask that reappears every launch trains people to close it unread.
+           The QR encodes https://paypal.me/exzilcalanza and is a hash-pinned payload member,
+           so it cannot be swapped without failing the release gate. -->
+      <div class="support-card" id="supportCard" hidden role="complementary" aria-label="Support Skynet">
+        <button class="support-close" id="supportClose" type="button" title="Not now" aria-label="Dismiss">×</button>
+        <img class="support-qr" id="supportQr" src="support-qr.png" width="96" height="96"
+             alt="QR code linking to paypal.me/exzilcalanza">
+        <div class="support-body">
+          <div class="support-title">Become a founding backer</div>
+          <p class="support-text">
+            Skynet Desktop is independent and unfunded. If it saves you time, a small
+            sponsorship keeps it being built.
+          </p>
+          <a class="support-link" id="supportLink" href="https://paypal.me/exzilcalanza"
+             target="_blank" rel="noopener noreferrer">paypal.me/exzilcalanza</a>
+          <p class="support-disclaimer">Sponsorship — not equity or investment.</p>
+        </div>
+      </div>
+
       <div class="banner" id="banner" hidden>
         <span class="banner-tag" id="bannerTag">OFFLINE</span>
         <span class="banner-text" id="bannerText"></span>

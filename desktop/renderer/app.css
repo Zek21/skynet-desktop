@@ -150,6 +150,93 @@ button {
 
 .tb-appbuild.is-dirty { color: var(--warn, #d08b2c); opacity: 1; }
 
+/* --------------------------------------------------------------------------
+   SUPPORT CARD
+   A once-a-day sponsorship ask. Deliberately a quiet inline card rather than a
+   modal: it must never block the composer or steal focus from what the user
+   came to do. `hidden` is honoured by scoping display to :not([hidden]) --
+   a bare `display:flex` out-ranks the attribute and would pin it on screen.
+   -------------------------------------------------------------------------- */
+.support-card:not([hidden]) {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 0 0 12px;
+  padding: 14px 34px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2, rgba(255, 255, 255, 0.03));
+}
+
+.support-qr {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  border-radius: 6px;
+  /* The QR is pure black-on-white; a white plate keeps it scannable on a dark UI,
+     where a transparent PNG would render black-on-near-black and never scan. */
+  background: #fff;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.support-body { min-width: 0; }
+
+.support-title {
+  font-size: var(--fs-badge);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.support-text {
+  margin: 0 0 6px;
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.support-link {
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--accent, #4c8dff);
+  text-decoration: none;
+}
+
+.support-link:hover { text-decoration: underline; }
+
+.support-disclaimer {
+  margin: 6px 0 0;
+  font-size: var(--fs-meta);
+  opacity: 0.65;
+  color: var(--text-2);
+}
+
+.support-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.support-close:hover { background: var(--surface-3, rgba(255, 255, 255, 0.07)); color: var(--text); }
+
+@media (max-width: 560px) {
+  .support-qr { display: none; }
+}
+
 .tb-sub {
   font-size: var(--fs-meta);
   color: var(--text-2);

@@ -52,6 +52,21 @@ build it yourself from source instead. Instructions are below and take about two
 - **Sessions that persist.** Conversations are kept between launches.
 - **Frameless native shell.** Real window controls, per-user install, proper Start Menu and
   desktop shortcuts, clean uninstall.
+- **Build identity in the titlebar.** Every build shows the content digest that produced it,
+  so a bug report always maps back to precise bytes.
+
+## Supporting the project
+
+Skynet Desktop is independent and unfunded. The app shows a sponsorship card **once per
+day** — dismissible, never blocking — linking to
+[paypal.me/exzilcalanza](https://paypal.me/exzilcalanza).
+
+To be explicit: that is **sponsorship, not equity or investment**. Nothing is gated behind
+it and no feature is withheld from people who do not pay.
+
+The QR image in that card is a hash-pinned release payload member and its decoded URL is
+asserted by the test suite, so the payment target cannot be changed without failing the
+release gate.
 
 ## Screenshots
 
@@ -83,7 +98,7 @@ Get-FileHash -Algorithm SHA256 .\Skynet-Desktop-Setup-0.1.1-x64.exe
 
 **v0.1.1 SHA-256**
 ```
-da674902bc7aab276d1da0dc3863f210281fe9047d66b24ca6f2f5df2d7c8528
+b1f5c8c30de1706cda56feb93bc6ffceed147cdc0cc895df96f886a7326ef56d
 ```
 
 Every build also records a machine-readable attestation

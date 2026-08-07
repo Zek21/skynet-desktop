@@ -33,6 +33,9 @@
     navToggle: $('navToggle'),
     tbBuild: $('tbBuild'),
     tbAppBuild: $('tbAppBuild'),
+    supportCard: $('supportCard'),
+    supportClose: $('supportClose'),
+    supportLink: $('supportLink'),
     winMin: $('winMin'),
     winMax: $('winMax'),
     winClose: $('winClose'),
@@ -2019,6 +2022,59 @@
      HEALTH
      ========================================================================== */
 
+  /* ==========================================================================
+     SUPPORT CARD — at most once per calendar day
+     ========================================================================== */
+
+  var SUPPORT_SEEN_KEY = 'skynet.support.lastShownDay';
+
+  /* A LOCAL calendar day, not a UTC one and not a rolling 24h window. `toISOString()`
+     would roll over mid-evening for anyone west of UTC, showing the card twice in one
+     of their days; a rolling window drifts later each time until it lands mid-session. */
+  function localDayStamp(now) {
+    var d = now || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+           String(d.getDate()).padStart(2, '0');
+  }
+
+  function supportCardDue(today, lastShown) {
+    // Never seen -> due. Seen on a different day -> due. Seen today -> not due.
+    return !lastShown || lastShown !== today;
+  }
+
+  function readSupportLastShown() {
+    try {
+      return window.localStorage.getItem(SUPPORT_SEEN_KEY);
+    } catch (e) {
+      // Storage can be unavailable or full. Treat that as "already shown" rather than
+      // showing on every launch -- a sponsorship ask that cannot remember being dismissed
+      // is worse than one that is occasionally missed.
+      return localDayStamp();
+    }
+  }
+
+  function markSupportShown(today) {
+    try {
+      window.localStorage.setItem(SUPPORT_SEEN_KEY, today);
+    } catch (e) { /* non-fatal: worst case it shows again next launch */ }
+  }
+
+  function dismissSupportCard() {
+    if (el.supportCard) el.supportCard.hidden = true;
+  }
+
+  function renderSupportCard() {
+    var card = el.supportCard;
+    if (!card) return;
+    var today = localDayStamp();
+    if (!supportCardDue(today, readSupportLastShown())) {
+      card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+    markSupportShown(today);
+  }
+
   /* Show WHICH bytes are running. The version string alone is not an answer: two payloads
      once shipped as "0.1.1" with different app.asar hashes, so a crash report could not be
      mapped to code. buildId is content-derived, so it is unique per payload. A build made
@@ -2503,6 +2559,8 @@
     autoGrow();
     setStreaming(false);
     renderBuildIdentity();
+    renderSupportCard();
+    if (el.supportClose) el.supportClose.addEventListener('click', dismissSupportCard);
     refreshHealth();
     refreshFleet();
     refreshSessions();
